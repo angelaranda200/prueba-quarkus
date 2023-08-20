@@ -29,13 +29,15 @@ jobs:
 
     - name: Get 5 characters of last commit
       run: echo "COMMIT_HASH=${GITHUB_SHA::5}" >> $GITHUB_ENV
+
+    - name: Extract version from pom.xml
+      id: extract_version
+      run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
       
     - name: Build Docker Image
       id: build_image
       run: |
-        - MVN_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-        - echo $MVN_VERSION
-        IMAGE_TAG="$MVN_VERSION-${{ env.COMMIT_HASH }}"
+        IMAGE_TAG="${{ steps.extract_version.outputs.version }}-${{ env.COMMIT_HASH }}"
         
         docker buildx create --use
         docker buildx build -f .\src\main\docker\Dockerfile.jvm -t angelaranda04/quarkus-prueba:$IMAGE_TAG .
@@ -51,10 +53,7 @@ jobs:
       run: |
         docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
         
-        
-        - MVN_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-        - echo $MVN_VERSION
-        IMAGE_TAG="$MVN_VERSION-${{ env.COMMIT_HASH }}"
+        IMAGE_TAG="${{ steps.extract_version.outputs.version }}-${{ env.COMMIT_HASH }}"
         
         docker push angelaranda04/quarkus-prueba:$IMAGE_TAG
     
