@@ -18,12 +18,42 @@ jobs:
     - name: Set up Maven
       uses: actions/setup-java@v2
       with:
-        java-version: '17'  
+        java-version: '11'  # Cambia esto a la versión de Java que necesitas
         
-    - name: Get the version from pom.xml
+    - name: Build with Maven
+      run: mvn clean package
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+      
+    - name: Build Docker Image
+      id: build_image
       run: |
-         - MVN_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-         - echo $MVN_VERSION
+        COMMIT_HASH=$(git rev-parse --short=5 HEAD)
+        - MVN_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+        - echo $MVN_VERSION
+        IMAGE_TAG="$MVN_VERSION-$COMMIT_HASH"
+        
+        docker buildx create --use
+        docker buildx build -f .\src\main\docker\Dockerfile.jvm -t angelaranda04/quarkus-prueba:$IMAGE_TAG .
+      
+  push:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Push Docker Image
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} 
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  
+      run: |
+        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        
+        COMMIT_HASH=$(git rev-parse --short=5 HEAD)
+        - MVN_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+        - echo $MVN_VERSION
+        IMAGE_TAG="$MVN_VERSION-$COMMIT_HASH"
+        
+        docker push angelaranda04/quarkus-prueba:$IMAGE_TAG
     
         
    
