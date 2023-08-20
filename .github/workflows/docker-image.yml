@@ -40,7 +40,7 @@ jobs:
         IMAGE_TAG="${{ steps.extract_version.outputs.version }}-${{ env.COMMIT_HASH }}"
         
         docker buildx create --use
-        docker buildx build -f .\src\main\docker\Dockerfile.jvm -t angelaranda04/quarkus-prueba:$IMAGE_TAG .
+        docker buildx build -t .\src\main\docker\Dockerfile.jvm -t angelaranda04/quarkus-prueba:$IMAGE_TAG .
       
   push:
     needs: build
