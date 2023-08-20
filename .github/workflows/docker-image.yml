@@ -33,29 +33,15 @@ jobs:
     - name: Extract version from pom.xml
       id: extract_version
       run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: .\src\main\docker\Dockerfile.jvm -t angelaranda04/quarkus-prueba:$IMAGE_TAG
       
-    - name: Build Docker Image
-      id: build_image
-      run: |
-        IMAGE_TAG="${{ steps.extract_version.outputs.version }}-${{ env.COMMIT_HASH }}"
-        
-        docker buildx create --use
-        docker buildx build -t .\src\main\docker\Dockerfile.jvm -t angelaranda04/quarkus-prueba:$IMAGE_TAG .
-      
-  push:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Push Docker Image
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} 
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  
-      run: |
-        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-        
-        IMAGE_TAG="${{ steps.extract_version.outputs.version }}-${{ env.COMMIT_HASH }}"
-        
-        docker push angelaranda04/quarkus-prueba:$IMAGE_TAG
+    
     
         
    
