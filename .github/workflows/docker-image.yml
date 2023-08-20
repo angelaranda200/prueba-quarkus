@@ -39,7 +39,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: .\src\main\docker\Dockerfile.jvm -t angelaranda04/quarkus-prueba:$IMAGE_TAG
+        tags: angelaranda04/quarkus-prueba:$IMAGE_TAG
       
     
     
