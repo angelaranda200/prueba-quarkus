@@ -52,7 +52,7 @@ jobs:
         context: .
         file: src/main/docker/Dockerfile.jvm
         push: true
-        tags: angelaranda04/quarkus-prueba:${{ steps.extract_version.outputs.version }}
+        tags: angelaranda04/quarkus-prueba:${{ env.DATE }}-${{env.COMMIT_HASH}}
       
     
     
