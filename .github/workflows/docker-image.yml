@@ -36,6 +36,9 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
+    - name: Obtener fecha
+      run: echo "DATE=$(date +%d%m%Y%H%M)" >> $GITHUB_ENV 
+
     - name: Get 5 characters of last commit
       run: echo "COMMIT_HASH=${GITHUB_SHA::5}" >> $GITHUB_ENV
 
@@ -49,7 +52,7 @@ jobs:
         context: .
         file: src/main/docker/Dockerfile.jvm
         push: true
-        tags: angelaranda04/quarkus-prueba:${{ steps.extract_version.outputs.version }}-${{ env.COMMIT_HASH }}
+        tags: angelaranda04/quarkus-prueba:${{ env.DATE }}-${{ env.COMMIT_HASH }}
       
     
     
